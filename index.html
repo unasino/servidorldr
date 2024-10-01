@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta Leder Data</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .form-container {
+            width: 100%;
+            max-width: 500px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: bold;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .btn {
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #e9ecef;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            white-space: pre-wrap; /* Muestra JSON formateado */
+        }
+        .result p {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Consulta de Datos con Leder Data</h1>
+
+    <div class="form-container">
+        <!-- Consulta por Placa de Vehículo -->
+        <h3>Consulta Vehículo SUNARP</h3>
+        <div class="form-group">
+            <label for="placa">Placa del Vehículo:</label>
+            <input type="text" id="placa" placeholder="Ingrese la placa del vehículo">
+        </div>
+        <button class="btn" onclick="consultaVehiculo()">Consultar Vehículo</button>
+        <div class="result" id="vehiculoResult"></div>
+
+        <!-- Consulta por DNI en Fiscalía -->
+        <h3>Consulta Fiscalía por DNI</h3>
+        <div class="form-group">
+            <label for="dni">DNI:</label>
+            <input type="text" id="dni" placeholder="Ingrese el DNI">
+        </div>
+        <button class="btn" onclick="consultaFiscaliaDNI()">Consultar DNI</button>
+        <div class="result" id="fiscaliaDniResult"></div>
+
+        <!-- Consulta por Nombres en Fiscalía -->
+        <h3>Consulta Fiscalía por Nombres</h3>
+        <div class="form-group">
+            <label for="nombres">Nombres:</label>
+            <input type="text" id="nombres" placeholder="Ingrese los nombres">
+        </div>
+        <div class="form-group">
+            <label for="apepaterno">Apellido Paterno:</label>
+            <input type="text" id="apepaterno" placeholder="Ingrese el apellido paterno">
+        </div>
+        <div class="form-group">
+            <label for="apematerno">Apellido Materno:</label>
+            <input type="text" id="apematerno" placeholder="Ingrese el apellido materno">
+        </div>
+        <button class="btn" onclick="consultaFiscaliaNombres()">Consultar Nombres</button>
+        <div class="result" id="fiscaliaNombresResult"></div>
+    </div>
+
+    <script>
+        const apiToken = "OB8AudCp3hZpcy8sqrV9XugfxNQ08ocXHsmVjKfP0hz9BYh0iJjQdQW8X3YJImus";
+
+        function consultaVehiculo() {
+            const placa = document.getElementById('placa').value;
+            fetch('https://leder-data-api.ngrok.dev/v1.7/vehiculos/sunarp', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    placa: placa,
+                    token: apiToken
+                })
+            })
+            .then(async response => {
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error('Error en la solicitud: ' + errorText);
+                }
+                return response.json();
+            })
+            .then(data => {
+                document.getElementById('vehiculoResult').innerHTML = JSON.stringify(data, null, 2);
+            })
+            .catch(error => {
+                document.getElementById('vehiculoResult').innerHTML = 'Error en la consulta: ' + error.message;
+            });
+        }
+
+        function consultaFiscaliaDNI() {
+            const dni = document.getElementById('dni').value;
+            fetch('https://leder-data-api.ngrok.dev/v1.7/persona/justicia/fiscalia/dni', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    dni: dni,
+                    token: apiToken
+                })
+            })
+            .then(async response => {
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error('Error en la solicitud: ' + errorText);
+                }
+                return response.json();
+            })
+            .then(data => {
+                document.getElementById('fiscaliaDniResult').innerHTML = JSON.stringify(data, null, 2);
+            })
+            .catch(error => {
+                document.getElementById('fiscaliaDniResult').innerHTML = 'Error en la consulta: ' + error.message;
+            });
+        }
+
+        function consultaFiscaliaNombres() {
+            const nombres = document.getElementById('nombres').value;
+            const apepaterno = document.getElementById('apepaterno').value;
+            const apematerno = document.getElementById('apematerno').value;
+            fetch('https://leder-data-api.ngrok.dev/v1.7/persona/justicia/fiscalia/nombres', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    nombres: nombres,
+                    apepaterno: apepaterno,
+                    apematerno: apematerno,
+                    token: apiToken
+                })
+            })
+            .then(async response => {
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error('Error en la solicitud: ' + errorText);
+                }
+                return response.json();
+            })
+            .then(data => {
+                document.getElementById('fiscaliaNombresResult').innerHTML = JSON.stringify(data, null, 2);
+            })
+            .catch(error => {
+                document.getElementById('fiscaliaNombresResult').innerHTML = 'Error en la consulta: ' + error.message;
+            });
+        }
+    </script>
+</body>
+</html>
